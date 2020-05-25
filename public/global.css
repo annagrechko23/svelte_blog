@@ -64,3 +64,18 @@ button:not(:disabled):active {
 button:focus {
 	border-color: #666;
 }
+.smui-card__content{
+	text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    padding: 0!important;
+}
+.smui-card__content.active{
+	-webkit-box-orient: initial;
+}
+.mdc-card__action--icon:not(:disabled) {
+    color: #ff3e00!important;
+}
