@@ -11,7 +11,7 @@
   let header = "";
   let description = "";
   let createTemplate = false;
-
+  let error = false;
   const postsData = firestore.collection("articles");
 
   const posts = collectionData(
@@ -19,12 +19,18 @@
     "id"
   ).pipe(startWith([]));
    const addPost = () => {
-    firestore
-      .collection("articles")
-      .add({ header, description, created: Date.now(), checked: false });
-    header = "";
-    description = "";
-    createTemplate = false;
+     if(header && description) {
+      firestore
+        .collection("articles")
+        .add({ header, description, created: Date.now(), checked: false });
+        header = "";
+        description = "";
+        createTemplate = false;
+        error = false;
+     } else {
+       error = true;
+     }
+    
   }
   const addToFavourite = (event) => {
     const { id, newStatus } = event.detail;
@@ -63,6 +69,9 @@
     display: flex;
     flex-direction: column;
   }
+  .error-message{
+    color: red;
+  }
 </style>
 
 <div class="blog-wrap">
@@ -76,8 +85,13 @@
 <Card style="width: 360px; padding: 20px;">
 
     <div class="create-post-wrap">
-      <Textfield bind:value={header} label="Title" />
-      <Textfield bind:value={description} label="Description" />
+      <Textfield bind:value={header}  input$required  label="Title" />
+      <Textfield  textarea bind:value={description} label="Description" />
+      {#if error}
+        <div class="error-message">
+          please fill fields
+        </div>
+       {/if}
       <Button on:click={addPost}>
         <Label>add post</Label>
       </Button>

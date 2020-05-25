@@ -20,7 +20,6 @@ export let id;
   export let description;
   export let created;
   export let checked;
-  export let addToFavourite;
 
   let fullText = false;
 
