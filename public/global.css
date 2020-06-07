@@ -79,3 +79,24 @@ button:focus {
 .mdc-card__action--icon:not(:disabled) {
     color: #ff3e00!important;
 }
+.mdc-icon-button:after, .mdc-icon-button:before{
+	background-color: #ff3e00!important;
+}
+.mdc-card__actions{
+	padding: 10px 0;
+}
+.comment-button{
+	display: flex!important;
+	align-self: center;
+	justify-content: center;
+}
+
+.comment-button .mdc-icon-button__icon{
+	width: 25px!important;
+}
+.comment-name .material-icons {
+    margin-right: 10px;
+  }
+ .create-comment-wrap .mdc-text-field{
+    width: 100%;
+  }
