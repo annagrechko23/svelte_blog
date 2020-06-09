@@ -85,13 +85,13 @@ button:focus {
 .mdc-card__actions{
 	padding: 10px 0;
 }
-.comment-button{
+.action-button{
 	display: flex!important;
 	align-self: center;
 	justify-content: center;
 }
 
-.comment-button .mdc-icon-button__icon{
+.action-button .mdc-icon-button__icon{
 	width: 25px!important;
 }
 .comment-name .material-icons {

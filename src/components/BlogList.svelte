@@ -1,6 +1,5 @@
 <script>
   import Post from "./Post.svelte";
-  import { afterUpdate } from "svelte";
   import { startWith } from "rxjs/operators";
   import { collectionData, firestore } from "./../firebase";
   import firebase, { app } from "../firebase";
@@ -24,16 +23,13 @@
   let error = false;
   let url = "";
   let file = "";
+  let allPosts = false;
   const postsData = firestore.collection("articles").orderBy("created");
-  // const posts = [];
-  const posts = collectionData(postsData, "id").pipe(startWith([]));
-  console.log(posts);
-  afterUpdate(() => {
-    const postsData = firestore.collection("articles").orderBy("created");
-
-    console.log(postsData);
-    console.log("the component just updated");
+  let posts = [];
+  collectionData(postsData, "id").subscribe(users => {
+    posts = users;
   });
+
   const addPost = () => {
     if (header && description) {
       firestore.collection("articles").add({
@@ -41,7 +37,8 @@
         description,
         created: Date.now(),
         checked: false,
-        image: firestore.doc("/images/" + file.name)
+        image: firestore.doc("/images/" + file.name),
+        likes: 0
       });
       var storageRef = storage.ref("images/" + file.name);
       var task = storageRef.put(file);
@@ -57,29 +54,32 @@
       error = true;
     }
   };
-  const addToFavourite = event => {
-    const { id, newStatus } = event.detail;
+  const countLikes = event => {
+    const { id, newStatus, likes } = event.detail;
+    const num = newStatus ? likes + 1 : likes - 1;
     firestore
       .collection("articles")
       .doc(id)
-      .update({ checked: newStatus });
+      .update({ likes: num, checked: newStatus });
   };
   const addComment = event => {
     const { id, commentName, comment, commentsBlock } = event.detail;
-    console.log(commentsBlock);
-    const generateNumber = commentsBlock.lenght + 1;
+
+    const generateNumber =
+      commentsBlock.length === 0 ? 1 : commentsBlock.length + 1;
+    const newComments = {
+      ...commentsBlock,
+      [generateNumber]: {
+        name: commentName,
+        comment,
+        date: Date.now()
+      }
+    };
     firestore
       .collection("articles")
       .doc(id)
       .update({
-        comments: {
-          ...commentsBlock,
-          [generateNumber]: {
-            name: commentName,
-            comment,
-            date: Date.now()
-          }
-        }
+        comments: newComments
       });
   };
   const onFileChange = event => {
@@ -100,7 +100,9 @@
     padding: 20px;
     border: 1px solid #eee;
     border-radius: 4px;
-    margin: 0 auto;
+    position: absolute;
+    top: 50%;
+    right: 10%;
   }
   .blog-header {
     font-size: 24px;
@@ -122,13 +124,16 @@
     text-align: left;
     text-transform: capitalize;
   }
+  .show-all-btn {
+    text-align: left;
+  }
 </style>
 
 <div class="blog-wrap">
   <h1 class="blog-header">Blog</h1>
   <ul class="posts">
-    {#each $posts as post}
-      <Post {...post} on:toggle={addToFavourite} on:addComment={addComment} />
+    {#each allPosts ? posts : posts.slice(0, 3) as post}
+      <Post {...post} on:toggle={countLikes} on:addComment={addComment} />
     {/each}
   </ul>
   {#if createTemplate}
@@ -146,9 +151,22 @@
       </div>
     </Card>
   {/if}
+  <div class="show-all-btn">
+    <Button style="margin-top: 20px;" on:click={() => (allPosts = !allPosts)}>
+      {#if posts.length > 3}
+        {#if !allPosts}
+          <Label>show all posts</Label>
+        {:else}
+          <Label>show less posts</Label>
+        {/if}
+      {/if}
+
+    </Button>
+  </div>
   <Button
     style="margin-top: 20px;"
     on:click={() => (createTemplate = !createTemplate)}>
     <Label>create new post</Label>
   </Button>
+
 </div>

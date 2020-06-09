@@ -25,6 +25,7 @@
   export let checked;
   export let image;
   export let comments;
+  export let likes;
   let urlImage;
   let commentsBlock = [];
   let fullText = false;
@@ -41,14 +42,15 @@
   }
   if (comments) {
     commentsBlock = Object.values(comments);
-    console.log(commentsBlock)
   }
 
   const toggleStatus = () => {
     let newStatus = !checked;
+    console.log(newStatus)
     dispatch("toggle", {
       id,
-      newStatus
+      newStatus,
+      likes
     });
   };
   const addComment = () => {
@@ -136,6 +138,7 @@
       </ActionButtons>
       <ActionIcons>
         <IconButton
+          class="action-button"
           on:click={toggleStatus}
           bind:pressed={checked}
           toggle
@@ -143,9 +146,10 @@
           title="Add to favorites">
           <Icon class="material-icons" on>favorite</Icon>
           <Icon class="material-icons">favorite_border</Icon>
+          <span class="comment-number"> {likes}</span>
         </IconButton>
         <IconButton
-          class="comment-button"
+          class="action-button"
           on:click={() => (showComments = !showComments)}
           toggle
           aria-label="Add to favorites"
@@ -161,7 +165,7 @@
         {#if commentsBlock.length > 0}
           <h3>Comments</h3>
         {:else}
-        <h3>No Comments. Left One.</h3>
+        <h3>No Comments. Write One.</h3>
         {/if}
         {#each commentsBlock as comment}
           <li>
