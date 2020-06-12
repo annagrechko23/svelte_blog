@@ -65,6 +65,15 @@
    comment = "";
    error = false;
   };
+  const createComments = () => {
+    createComment = !createComment
+  }
+  const showCommentsBlock = () => {
+    showComments = !showComments
+  }
+    const fullTextShow = () => {
+      fullText = !fullText
+  }
 </script>
 
 <style type="text/scss" lang="scss">
@@ -115,7 +124,7 @@
 </style>
 
 <li>
-  <Card style="width: 360px; padding: 20px;">
+  <div class="card" style="width: 360px; padding: 20px;">
     <span class="post-date">{new Date(created).toLocaleString()}</span>
     <h2>{header}</h2>
     {#if urlImage}
@@ -123,43 +132,40 @@
       <img src={urlImage} alt="" />
     </div>
     {/if}
-    <Content class={fullText ? 'active' : ''}>{description}</Content>
-    <Actions>
-      <ActionButtons>
-        {#if description.length > 70}
-          <Button on:click={() => (fullText = !fullText)}>
+    <div class={fullText ? 'active' : ''}>{description}</div>
+    <div>
+      {#if description.length > 70}
+          <div>
             {#if !fullText}
-              <Label>show more</Label>
+              <span>show more</span>
             {:else}
-              <Label>show less</Label>
+              <span>show less</span>
             {/if}
-          </Button>
+          </div>
         {/if}
-      </ActionButtons>
-      <ActionIcons>
-        <IconButton
+      <div>
+        <div
           class="action-button"
           on:click={toggleStatus}
-          bind:pressed={checked}
+          on:click={checked}
           toggle
           aria-label="Add to favorites"
           title="Add to favorites">
-          <Icon class="material-icons" on>favorite</Icon>
-          <Icon class="material-icons">favorite_border</Icon>
+          <div class="material-icons" on>favorite</div>
+          <div class="material-icons">favorite_border</div>
           <span class="comment-number"> {likes}</span>
-        </IconButton>
-        <IconButton
+        </div>
+        <div
           class="action-button"
-          on:click={() => (showComments = !showComments)}
+          on:click={showCommentsBlock}
           toggle
           aria-label="Add to favorites"
           title="Add to favorites">
-          <Icon class="material-icons" on>comment</Icon>
-          <Icon class="material-icons">comment_border</Icon>
+          <div class="material-icons" on>comment</div>
+          <div class="material-icons">comment_border</div>
           <span class="comment-number">{commentsBlock.length}</span>
-        </IconButton>
-      </ActionIcons>
-    </Actions>
+        </div>
+      </div>
     {#if showComments}
       <ul class="comments-wrap">
         {#if commentsBlock.length > 0}
@@ -170,7 +176,8 @@
         {#each commentsBlock as comment}
           <li>
             <div class="comment-name">
-            <p ><Icon class="material-icons">face</Icon>
+            <p>
+            <Icon class="material-icons">face</Icon>
               {comment.name}</p>
               <p>{new Date(comment.date).toLocaleString()}</p>
             </div>
@@ -180,22 +187,23 @@
       </ul>
       {#if createComment}
         <div class="create-comment-wrap">
-          <Textfield bind:value={commentName} input$required label="Name" />
-          <Textfield textarea bind:value={comment} label="Comment" />
+        <input type="text" value={commentName} required placeholder="Name">
+        <textarea > </textarea>
           {#if error}
             <div class="error-message">please fill fields</div>
           {/if}
-          <Button on:click={addComment}>
-            <Label>add comment</Label>
-          </Button>
+          <div on:click={addComment}>
+            <span>add comment</span>
+          </div>
         </div>
       {/if}
-      <Button
+      
+      <div
         style="margin-top: 20px;"
-        on:click={() => (createComment = !createComment)}>
-        <Label>write a comment</Label>
-      </Button>
+        on:click={createComments}>
+        <span>write a comment</span>
+      </div>
     {/if}
 
-  </Card>
+  </div>
 </li>

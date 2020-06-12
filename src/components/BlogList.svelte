@@ -1,3 +1,4 @@
+
 <script>
   import Post from "./Post.svelte";
   import { startWith } from "rxjs/operators";
@@ -26,6 +27,14 @@
   let allPosts = false;
   const postsData = firestore.collection("articles").orderBy("created");
   let posts = [];
+  let urlImage;
+  let commentsBlock = [];
+  let fullText = false;
+  let showComments = false;
+  let createComment = false;
+
+  let commentName = "";
+  let comment = "";
   collectionData(postsData, "id").subscribe(users => {
     posts = users;
   });
@@ -86,6 +95,15 @@
     var fileData = event.target.files[0];
     file = fileData;
   };
+  const createComments = () => {
+    createComment = !createComment
+  }
+  const showCommentsBlock = () => {
+    showComments = !showComments
+  }
+    const fullTextShow = () => {
+      fullText = !fullText
+  }
 </script>
 
 <style>
@@ -100,9 +118,10 @@
     padding: 20px;
     border: 1px solid #eee;
     border-radius: 4px;
-    position: absolute;
+    /* position: absolute;
     top: 50%;
-    right: 10%;
+    right: 10%; */
+    margin: 0 auto;
   }
   .blog-header {
     font-size: 24px;
@@ -128,31 +147,114 @@
     text-align: left;
   }
 </style>
+<svelte:options tag={"blog-window"} immutable={true} />
 
 <div class="blog-wrap">
   <h1 class="blog-header">Blog</h1>
   <ul class="posts">
     {#each allPosts ? posts : posts.slice(0, 3) as post}
-      <Post {...post} on:toggle={countLikes} on:addComment={addComment} />
+      <li>
+  <div class="card" style="width: 360px; padding: 20px;">
+    <span class="post-date">{new Date(post.created).toLocaleString()}</span>
+    <h2>{header}</h2>
+    {#if urlImage}
+    <div class="post-image">
+      <img src={post.urlImage} alt="" />
+    </div>
+    {/if}
+    <div class={fullText ? 'active' : ''}>{description}</div>
+    <div>
+      {#if description.length > 70}
+          <div>
+            {#if !fullText}
+              <span>show more</span>
+            {:else}
+              <span>show less</span>
+            {/if}
+          </div>
+        {/if}
+      <div>
+        <div
+          class="action-button"
+          on:click={toggleStatus}
+          on:click={checked}
+          toggle
+          aria-label="Add to favorites"
+          title="Add to favorites">
+          <div class="material-icons" on>favorite</div>
+          <div class="material-icons">favorite_border</div>
+          <span class="comment-number"> {post.likes}</span>
+        </div>
+        <div
+          class="action-button"
+          on:click={showCommentsBlock}
+          toggle
+          aria-label="Add to favorites"
+          title="Add to favorites">
+          <div class="material-icons" on>comment</div>
+          <div class="material-icons">comment_border</div>
+          <span class="comment-number">{commentsBlock.length}</span>
+        </div>
+      </div>
+    {#if showComments}
+      <ul class="comments-wrap">
+        {#if commentsBlock.length > 0}
+          <h3>Comments</h3>
+        {:else}
+        <h3>No Comments. Write One.</h3>
+        {/if}
+        {#each commentsBlock as comment}
+          <li>
+            <div class="comment-name">
+            <div class="material-icons">face</div>
+              {comment.name}
+              <p>{new Date(comment.date).toLocaleString()}</p>
+            </div>
+            <div>{comment.comment}</div>
+          </li>
+        {/each}
+      </ul>
+      {#if createComment}
+        <div class="create-comment-wrap">
+        <input type="text" value={commentName} required placeholder="Name">
+        <textarea > </textarea>
+          {#if error}
+            <div class="error-message">please fill fields</div>
+          {/if}
+          <div on:click={addComment}>
+            <span>add comment</span>
+          </div>
+        </div>
+      {/if}
+      
+      <div
+        style="margin-top: 20px;"
+        on:click={createComments}>
+        <span>write a comment</span>
+      </div>
+    {/if}
+
+  </div>
+</li>
     {/each}
   </ul>
   {#if createTemplate}
-    <Card style="width: 360px; padding: 20px;">
+    <div style="width: 360px; padding: 20px;">
       <div class="create-post-wrap">
-        <Textfield bind:value={header} input$required label="Title" />
+        <!-- <Textfield bind:value={header} input$required label="Title" />
         <Textfield textarea bind:value={description} label="Description" />
-        <Textfield type="file" on:change={onFileChange} bind:value={url} />
+        <Textfield type="file" on:change={onFileChange} bind:value={url} /> -->
         {#if error}
           <div class="error-message">please fill fields</div>
         {/if}
-        <Button on:click={addPost}>
+        <!-- <Button on:click={addPost}>
           <Label>add post</Label>
-        </Button>
+        </Button> -->
       </div>
-    </Card>
+    </div>
   {/if}
   <div class="show-all-btn">
-    <Button style="margin-top: 20px;" on:click={() => (allPosts = !allPosts)}>
+    <!-- <Button style="margin-top: 20px;" on:click={() => (allPosts = !allPosts)}>
       {#if posts.length > 3}
         {#if !allPosts}
           <Label>show all posts</Label>
@@ -161,12 +263,12 @@
         {/if}
       {/if}
 
-    </Button>
+    </Button> -->
   </div>
-  <Button
+  <!-- <Button
     style="margin-top: 20px;"
     on:click={() => (createTemplate = !createTemplate)}>
     <Label>create new post</Label>
-  </Button>
+  </Button> -->
 
 </div>
