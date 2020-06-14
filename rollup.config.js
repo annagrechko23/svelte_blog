@@ -15,17 +15,18 @@ export default {
 		name: 'app',
 		file: 'public/build/bundle.js'
 	},
+
 	plugins: [
 		svelte({
-      customElement: true,
-      dev: !production,
-      css: css => {
-        css.write('public/build/bundle.css');
-      }
+			customElement: true,
+			dev: !production,
+			css: css => {
+				css.write('public/build/bundle.css');
+			}
       
 			
 		}),
-
+		
 		resolve({
 			browser: true,
 			dedupe: ['svelte']

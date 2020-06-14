@@ -1,5 +1,10 @@
+<svelte:options tag={"blog-window"}  />
+
 <script>
   import { startWith } from 'rxjs/operators'
+  import Textfield from "@smui/textfield";
+
+  import Post from './Post.svelte'
   import { collectionData, firestore } from './../firebase'
   import firebase, { app } from '../firebase'
   import { put, getDownloadURL } from 'rxfire/storage'
@@ -49,13 +54,13 @@
       error = true
     }
   }
-  const countLikes = (event) => {
-    const { id, newStatus, likes } = event.detail
-    const num = newStatus ? likes + 1 : likes - 1
+  const countLikes = (id, newStatus, likes) => {
+    const checked = newStatus = !newStatus
+    const num = checked ? likes + 1 : likes - 1
     firestore
       .collection('articles')
       .doc(id)
-      .update({ likes: num, checked: newStatus })
+      .update({ likes: num, checked })
   }
   const addComment = (event) => {
     const { id, commentName, comment, commentsBlock } = event.detail
@@ -80,9 +85,10 @@
     console.log(urlImage)
   }
 
-  // if (comments) {
-  //   commentsBlock = Object.values(comments);
-  // }
+  const displayComments = (comments) => {
+    showComments = !showComments
+    commentsBlock = Object.values(comments);
+  }
 
   const onFileChange = (event) => {
     var fileData = event.target.files[0]
@@ -225,20 +231,26 @@
     box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
       0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
   }
+  .actions-wrap{
+    display: flex;
+    justify-content: flex-end;
+  }
 </style>
 
-<svelte:options tag={'blog-window'} immutable={true} />
 
 <div class="blog-wrap">
   <h1 class="blog-header">Blog</h1>
   <ul class="posts">
     {#each allPosts ? posts : posts.slice(0, 3) as post}
+    <!-- <Post post={post.created} /> -->
       <li>
         <div class="card">
           <span class="post-date">
             {new Date(post.created).toLocaleString()}
           </span>
           <h2>{post.header}</h2>
+          <i class="fab fa-accessible-icon"></i>
+
           {#if post.image}
             <div class="post-image">
               <img :src={showImage(post.image)} alt="" />
@@ -246,6 +258,7 @@
           {/if}
           <div class={fullText ? 'active description' : 'description'}>
             {post.description}
+            
           </div>
           <div>
             {#if post.description.length > 70}
@@ -257,17 +270,19 @@
                 {/if}
               </div>
             {/if}
-            <div>
-              <div class="action-button" on:click={countLikes}>
-                <i class="material-icons">favorite</i>
+            <div class="actions-wrap">
+              <div class="action-button" on:click={countLikes(post.id, post.checked, post.likes)}>
+                <img src="/assets/favourite.svg" alt="">
 
                 <span class="comment-number">{post.likes}</span>
               </div>
               <div
                 class="action-button"
-                on:click={() => (showComments = !showComments)}>
-                <i class="material-icons">comment</i>
-                <span class="comment-number">{commentsBlock.length}</span>
+                on:click={displayComments(post.comments)}>
+                <img src="/assets/comment.svg" alt="">
+                {#if post.comments} 
+                <span class="comment-number">{Object.keys(post.comments).length}</span>
+                {/if}
               </div>
             </div>
             {#if showComments}

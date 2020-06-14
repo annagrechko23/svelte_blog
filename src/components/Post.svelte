@@ -1,3 +1,6 @@
+
+<svelte:options tag={"my-nested-element"}  />
+
 <script>
   import { slide } from "svelte/transition";
   import { elasticInOut } from "svelte/easing";
@@ -26,6 +29,7 @@
   export let image;
   export let comments;
   export let likes;
+  export let post;
   let urlImage;
   let commentsBlock = [];
   let fullText = false;
@@ -35,7 +39,7 @@
   let commentName = "";
   let comment = "";
   let error = false;
-
+console.log(post)
   if (image) {
     const ref = storage.ref(image.path);
     getDownloadURL(ref).subscribe(url => (urlImage = url));
@@ -115,7 +119,7 @@
 </style>
 
 <li>
-  <Card style="width: 360px; padding: 20px;">
+  <div style="width: 360px; padding: 20px;">
     <span class="post-date">{new Date(created).toLocaleString()}</span>
     <h2>{header}</h2>
     {#if urlImage}
@@ -123,43 +127,42 @@
       <img src={urlImage} alt="" />
     </div>
     {/if}
-    <Content class={fullText ? 'active' : ''}>{description}</Content>
-    <Actions>
-      <ActionButtons>
+    <div class={fullText ? 'active' : ''}>{description}</div>
+    <div>
+      <div>
         {#if description.length > 70}
-          <Button on:click={() => (fullText = !fullText)}>
+          <div on:click={() => (fullText = !fullText)}>
             {#if !fullText}
-              <Label>show more</Label>
+              <div>show more</div>
             {:else}
-              <Label>show less</Label>
+              <div>show less</div>
             {/if}
-          </Button>
+          </div>
         {/if}
-      </ActionButtons>
-      <ActionIcons>
-        <IconButton
+      </div>
+      <div>
+        <div
           class="action-button"
           on:click={toggleStatus}
-          bind:pressed={checked}
           toggle
           aria-label="Add to favorites"
           title="Add to favorites">
-          <Icon class="material-icons" on>favorite</Icon>
-          <Icon class="material-icons">favorite_border</Icon>
+          <div class="material-icons" on>favorite</div>
+          <div class="material-icons">favorite_border</div>
           <span class="comment-number"> {likes}</span>
-        </IconButton>
-        <IconButton
+        </div>
+        <div
           class="action-button"
           on:click={() => (showComments = !showComments)}
           toggle
           aria-label="Add to favorites"
           title="Add to favorites">
-          <Icon class="material-icons" on>comment</Icon>
-          <Icon class="material-icons">comment_border</Icon>
+          <div class="material-icons" on>comment</div>
+          <div class="material-icons">comment_border</div>
           <span class="comment-number">{commentsBlock.length}</span>
-        </IconButton>
-      </ActionIcons>
-    </Actions>
+        </div>
+      </div>
+    </div>
     {#if showComments}
       <ul class="comments-wrap">
         {#if commentsBlock.length > 0}
@@ -180,22 +183,22 @@
       </ul>
       {#if createComment}
         <div class="create-comment-wrap">
-          <Textfield bind:value={commentName} input$required label="Name" />
-          <Textfield textarea bind:value={comment} label="Comment" />
+          <div  label="Name" />
+          <div textarea  label="Comment" />
           {#if error}
             <div class="error-message">please fill fields</div>
           {/if}
-          <Button on:click={addComment}>
-            <Label>add comment</Label>
-          </Button>
+          <div on:click={addComment}>
+            <div>add comment</div>
+          </div>
         </div>
       {/if}
-      <Button
+      <div
         style="margin-top: 20px;"
         on:click={() => (createComment = !createComment)}>
-        <Label>write a comment</Label>
-      </Button>
+        <div>write a comment</div>
+      </div>
     {/if}
 
-  </Card>
+  </div>
 </li>
