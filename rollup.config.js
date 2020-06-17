@@ -4,7 +4,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import postcss from 'rollup-plugin-postcss';
-
+import svg from 'rollup-plugin-svg-import';
 const production = !process.env.ROLLUP_WATCH;
 
 export default {
@@ -17,8 +17,9 @@ export default {
 	},
 
 	plugins: [
+    svg({ stringify: true }),
 		svelte({
-			customElement: true,
+      customElement: true, 
 			dev: !production,
 			css: css => {
 				css.write('public/build/bundle.css');
@@ -61,7 +62,7 @@ export default {
 	watch: {
 		clearScreen: false,
 		chokidar: false
-	}
+  }
 };
 
 function serve() {
