@@ -8,7 +8,7 @@
   import { onMount, onDestroy } from 'svelte'
   import '@material/mwc-button'
 
-  export let title = 'Svelte Clock'
+  export let width = '350px';
 
   let header = ''
   let description = ''
@@ -98,7 +98,6 @@
   }
 
   .blog-wrap {
-    max-width: 360px;
     text-align: center;
     background-color: #fff;
     padding: 20px;
@@ -126,21 +125,6 @@
   li {
     margin-bottom: 20px;
   }
-  .action-btn {
-    color: #ff3e00;
-    border: 1px solid #ff3e00;
-    border-radius: 5px;
-    padding: 10px;
-    display: inline-block;
-    margin: 20px 0;
-    cursor: pointer;
-    transition: all 0.5s ease;
-    text-transform: uppercase;
-  }
-  .action-btn:hover {
-    color: #fff;
-    background-color: #ff3e00;
-  }
   .error-message {
     color: red;
     margin: 20px 0;
@@ -166,13 +150,18 @@
     --mdc-theme-on-primary: white;
     margin-top: 12px;
   }
+  .close-form {
+    text-align: right;
+    margin-bottom: 10px;
+    font-size: 21px;
+    cursor: pointer;
+  }
 </style>
 
 <svelte:options tag={'blog-window'} />
 
-<div class="blog-wrap">
+<div class="blog-wrap" style="max-width: {width}">
   <h1 class="blog-header">Blog</h1>
-  <h1>{title}</h1>
   <ul class="posts">
     {#each allPosts ? posts : posts.slice(0, 3) as post}
       <my-thing {...post} on:toggle={countLikes} on:addComment={addComment} />
@@ -181,6 +170,7 @@
   {#if createTemplate}
     <div>
       <div class="create-post-wrap">
+      <div class="close-form" on:click={() => (createTemplate = !createTemplate)}>&times;</div>
         <input bind:value={header} required placeholder="Title" />
         <textarea bind:value={description} placeholder="Description" />
         <input type="file" on:change={onFileChange} bind:value={url} />
@@ -191,7 +181,10 @@
           class="g-recaptcha"
           data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
           data-callback="verifyUser" />
-        <div on:click={addPost} class="action-btn">add post</div>
+        <mwc-button
+            on:click={addPost}
+            label="add post"
+            raised />
       </div>
     </div>
   {/if}

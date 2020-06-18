@@ -1,7 +1,5 @@
 <script>
   import { onMount } from 'svelte'
-  import favourite from './../../public/assets/favourite.svg'
-  import commentIcon from './../../public/assets/comment.svg'
   import Icon from 'fa-svelte'
   import '@material/mwc-icon-button-toggle'
   import '@material/mwc-button'
@@ -219,6 +217,7 @@
         style=" display: flex; justify-content: flex-end;">
         <div class="action-button">
           <mwc-icon-button-toggle
+            on={checked}
             onIcon="favorite"
             style="color:red"
             on:click={toggleStatus}
@@ -272,14 +271,12 @@
             <mwc-button on:click={addComment(id)} label="add comment" raised />
           </div>
         {/if}
-
         <mwc-button
           on:click={addComment(id)}
           label="write a comment"
           on:click={() => (createComment = !createComment)}
           raised />
       {/if}
-
     </div>
   </div>
 </li>
