@@ -24,6 +24,11 @@
   },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
+    "@material/mwc-button": "^0.15.0",
+    "@material/mwc-icon": "^0.15.0",
+    "@material/mwc-icon-button": "^0.15.0",
+    "@material/mwc-icon-button-toggle": "^0.15.0",
+    "@webcomponents/webcomponentsjs": "^2.4.3",
     "firebase": "^7.14.4",
     "rxfire": "^3.12.4",
     "rxjs": "^6.5.5",

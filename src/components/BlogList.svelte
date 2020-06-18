@@ -1,23 +1,36 @@
 <script>
-  import { startWith } from 'rxjs/operators';
-  import Post from './Post.svelte';
-  import { collectionData, firestore } from './../firebase';
-  import firebase, { app } from '../firebase';
-  import { put, getDownloadURL } from 'rxfire/storage';
-  import { storage } from '../firebase';
-  export let title = 'Svelte Clock';
+  import { startWith } from 'rxjs/operators'
+  import './Post.svelte'
+  import { collectionData, firestore } from './../firebase'
+  import firebase, { app } from '../firebase'
+  import { put, getDownloadURL } from 'rxfire/storage'
+  import { storage } from '../firebase'
+  import { onMount, onDestroy } from 'svelte'
+  import '@material/mwc-button'
 
-  let header = '';
-  let description = '';
-  let createTemplate = false;
-  let error = false;
-  let url = '';
-  let file = '';
-  let allPosts = false;
-  let posts = [];
-  const postsData = firestore.collection('articles').orderBy('created');
+  export let title = 'Svelte Clock'
+
+  let header = ''
+  let description = ''
+  let createTemplate = false
+  let error = false
+  let url = ''
+  let file = ''
+  let allPosts = false
+  let posts = []
+  const postsData = firestore.collection('articles').orderBy('created')
   collectionData(postsData, 'id').subscribe((users) => {
     posts = users
+  })
+
+  function verifyUser() {}
+
+  onMount(() => {
+    window.verifyUser = verifyUser
+  })
+
+  onDestroy(() => {
+    window.verifyUser = null
   })
   const addPost = () => {
     if (header && description) {
@@ -42,14 +55,20 @@
       error = true
     }
   }
-  const countLikes = (id, newStatus, likes) => {
-    const checked = (newStatus = !newStatus)
-    const num = checked ? likes + 1 : likes - 1
-    firestore.collection('articles').doc(id).update({ likes: num, checked })
+  const countLikes = (event) => {
+    console.log(event)
+    const { id, newStatus, likes } = event.detail
+    const num = newStatus ? likes + 1 : likes - 1
+    firestore
+      .collection('articles')
+      .doc(id)
+      .update({ likes: num, checked: newStatus })
   }
-  const addComment = (id) => {
-    const generateNumber = !commentsBlock ? 1 : commentsBlock.length + 1
+  const addComment = (event) => {
+    const { id, commentName, comment, commentsBlock } = event.detail
 
+    const generateNumber =
+      commentsBlock.length === 0 ? 1 : commentsBlock.length + 1
     const newComments = {
       ...commentsBlock,
       [generateNumber]: {
@@ -61,11 +80,6 @@
     firestore.collection('articles').doc(id).update({
       comments: newComments,
     })
-    showComments = false
-    createComment = false
-    commentName = ''
-    comment = ''
-    error = false
   }
   const onFileChange = (event) => {
     var fileData = event.target.files[0]
@@ -147,6 +161,11 @@
     box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
       0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
   }
+  mwc-button {
+    --mdc-theme-primary: #ff3e00;
+    --mdc-theme-on-primary: white;
+    margin-top: 12px;
+  }
 </style>
 
 <svelte:options tag={'blog-window'} />
@@ -156,38 +175,43 @@
   <h1>{title}</h1>
   <ul class="posts">
     {#each allPosts ? posts : posts.slice(0, 3) as post}
-      <Post {...post} on:toggle={countLikes} on:addComment={addComment} />
+      <my-thing {...post} on:toggle={countLikes} on:addComment={addComment} />
     {/each}
   </ul>
   {#if createTemplate}
-    <div style="width: 360px; padding: 20px;">
+    <div>
       <div class="create-post-wrap">
-        <input bind:value={header} required label="Title" />
-        <textarea bind:value={description} label="Description" />
+        <input bind:value={header} required placeholder="Title" />
+        <textarea bind:value={description} placeholder="Description" />
         <input type="file" on:change={onFileChange} bind:value={url} />
         {#if error}
           <div class="error-message">please fill fields</div>
         {/if}
+        <div
+          class="g-recaptcha"
+          data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+          data-callback="verifyUser" />
         <div on:click={addPost} class="action-btn">add post</div>
       </div>
     </div>
   {/if}
   <div class="show-all-btn">
-    <div
-      style="margin-top: 20px;"
-      on:click={() => (allPosts = !allPosts)}
-      class="action-btn">
       {#if posts.length > 3}
-        {#if !allPosts}show all posts{:else}show less posts{/if}
+        {#if !allPosts}
+          <mwc-button
+            on:click={() => (allPosts = !allPosts)}
+            label="show all posts"
+            raised />
+        {:else}
+          <mwc-button
+            on:click={() => (allPosts = !allPosts)}
+            label="show less posts"
+            raised />
+        {/if}
       {/if}
-
-    </div>
   </div>
-  <div
-    class="action-btn"
-    style="margin-top: 20px;"
-    on:click={() => (createTemplate = !createTemplate)}>
-    create new post
-  </div>
-
+  <mwc-button
+    on:click={() => (createTemplate = !createTemplate)}
+    label="create new post"
+    raised />
 </div>

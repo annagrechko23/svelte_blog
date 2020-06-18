@@ -1,5 +1,5 @@
 <script>
-  import BlogList from "./components/BlogList.svelte";
+  import "./components/BlogList.svelte";
 </script>
 
-<BlogList />
+<blog-window></blog-window>
