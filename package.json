@@ -29,6 +29,7 @@
     "@material/mwc-icon-button": "^0.15.0",
     "@material/mwc-icon-button-toggle": "^0.15.0",
     "@webcomponents/webcomponentsjs": "^2.4.3",
+    "coffeekraken-s-recaptcha-component": "^1.0.2",
     "firebase": "^7.14.4",
     "rxfire": "^3.12.4",
     "rxjs": "^6.5.5",

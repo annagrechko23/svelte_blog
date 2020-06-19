@@ -8,7 +8,9 @@
   import { onMount, onDestroy } from 'svelte'
   import '@material/mwc-button'
 
-  export let width = '350px';
+  export let width = '350px'
+  export let right = '50%'
+  export let top = '10%'
 
   let header = ''
   let description = ''
@@ -18,15 +20,22 @@
   let file = ''
   let allPosts = false
   let posts = []
-  const postsData = firestore.collection('articles').orderBy('created')
-  collectionData(postsData, 'id').subscribe((users) => {
-    posts = users
+  const myUrl = new URL(window.location.href)
+  const urlOrigin = myUrl.origin
+  const postsData = firestore.collection('articles').where('url', '==', urlOrigin);
+  collectionData(postsData, 'id').subscribe((data) => {
+    posts = data
   })
-
-  function verifyUser() {}
+  const verifyUser = () => {
+    console.log('2')
+  }
 
   onMount(() => {
-    window.verifyUser = verifyUser
+    const script = document.createElement("script");
+    script.src = "https://www.google.com/recaptcha/api.js";
+    script.async = true;
+    document.body.appendChild(script);
+    
   })
 
   onDestroy(() => {
@@ -41,6 +50,7 @@
         checked: false,
         image: firestore.doc('/images/' + file.name),
         likes: 0,
+        url: urlOrigin
       })
       var storageRef = storage.ref('images/' + file.name)
       var task = storageRef.put(file)
@@ -56,8 +66,8 @@
     }
   }
   const countLikes = (event) => {
-    console.log(event)
     const { id, newStatus, likes } = event.detail
+
     const num = newStatus ? likes + 1 : likes - 1
     firestore
       .collection('articles')
@@ -65,6 +75,8 @@
       .update({ likes: num, checked: newStatus })
   }
   const addComment = (event) => {
+    console.log(event)
+
     const { id, commentName, comment, commentsBlock } = event.detail
 
     const generateNumber =
@@ -84,7 +96,14 @@
   const onFileChange = (event) => {
     var fileData = event.target.files[0]
     file = fileData
+    
   }
+  var verifyCallback = function(response) {
+        parent.postMessage("Unlock", "{!$Site.BaseSecureUrl}");
+    };
+    var onloadCallback = function() {
+        
+    }
 </script>
 
 <style>
@@ -103,9 +122,7 @@
     padding: 20px;
     border: 1px solid #eee;
     border-radius: 4px;
-    /* position: absolute;
-    top: 50%;
-    right: 10%; */
+    position: absolute;
     margin: 0 auto;
   }
   .blog-header {
@@ -121,9 +138,10 @@
   .create-post-wrap {
     display: flex;
     flex-direction: column;
-  }
-  li {
-    margin-bottom: 20px;
+    box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
+      0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+    padding: 10px;
+    border-radius: 5px;
   }
   .error-message {
     color: red;
@@ -140,10 +158,15 @@
     display: flex;
     border-radius: 5px;
     padding: 12px 16px 14px;
-    border: none;
+    border: 1px rgba(0, 0, 0, 0.2) solid;
+
     z-index: 1;
     box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
       0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+  }
+  input[type='file'] {
+    box-shadow: none;
+    border: none;
   }
   mwc-button {
     --mdc-theme-primary: #ff3e00;
@@ -160,7 +183,7 @@
 
 <svelte:options tag={'blog-window'} />
 
-<div class="blog-wrap" style="max-width: {width}">
+<div class="blog-wrap" style="max-width: {width}; right: {right}; top: {top};">
   <h1 class="blog-header">Blog</h1>
   <ul class="posts">
     {#each allPosts ? posts : posts.slice(0, 3) as post}
@@ -170,38 +193,36 @@
   {#if createTemplate}
     <div>
       <div class="create-post-wrap">
-      <div class="close-form" on:click={() => (createTemplate = !createTemplate)}>&times;</div>
+        <div
+          class="close-form"
+          on:click={() => createTemplate = !createTemplate}>
+          &times;
+        </div>
         <input bind:value={header} required placeholder="Title" />
         <textarea bind:value={description} placeholder="Description" />
         <input type="file" on:change={onFileChange} bind:value={url} />
         {#if error}
           <div class="error-message">please fill fields</div>
         {/if}
-        <div
-          class="g-recaptcha"
-          data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-          data-callback="verifyUser" />
-        <mwc-button
-            on:click={addPost}
-            label="add post"
-            raised />
+           <div class="g-recaptcha" id="html_element" data-sitekey="6LeeqKYZAAAAAIyB1tgUoVq2KE9dnmgNBrqSazUC-KEY" render="explicit"></div>
+        <mwc-button on:click={addPost} label="add post" raised />
       </div>
     </div>
   {/if}
   <div class="show-all-btn">
-      {#if posts.length > 3}
-        {#if !allPosts}
-          <mwc-button
-            on:click={() => (allPosts = !allPosts)}
-            label="show all posts"
-            raised />
-        {:else}
-          <mwc-button
-            on:click={() => (allPosts = !allPosts)}
-            label="show less posts"
-            raised />
-        {/if}
+    {#if posts.length > 3}
+      {#if !allPosts}
+        <mwc-button
+          on:click={() => (allPosts = !allPosts)}
+          label="show all posts"
+          raised />
+      {:else}
+        <mwc-button
+          on:click={() => (allPosts = !allPosts)}
+          label="show less posts"
+          raised />
       {/if}
+    {/if}
   </div>
   <mwc-button
     on:click={() => (createTemplate = !createTemplate)}
