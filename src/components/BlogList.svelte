@@ -7,7 +7,6 @@
   import { storage } from '../firebase'
   import { onMount, onDestroy } from 'svelte'
   import '@material/mwc-button'
-
   export let width = '350px'
   export let right = '50%'
   export let top = '10%'
@@ -22,7 +21,9 @@
   let posts = []
   const myUrl = new URL(window.location.href)
   const urlOrigin = myUrl.origin
-  const postsData = firestore.collection('articles').where('url', '==', urlOrigin);
+    console.log(urlOrigin)
+
+  const postsData = firestore.collection('articles')
   collectionData(postsData, 'id').subscribe((data) => {
     posts = data
   })
@@ -31,10 +32,7 @@
   }
 
   onMount(() => {
-    const script = document.createElement("script");
-    script.src = "https://www.google.com/recaptcha/api.js";
-    script.async = true;
-    document.body.appendChild(script);
+    window.verifyUser = verifyUser
     
   })
 
@@ -75,7 +73,6 @@
       .update({ likes: num, checked: newStatus })
   }
   const addComment = (event) => {
-    console.log(event)
 
     const { id, commentName, comment, commentsBlock } = event.detail
 
@@ -204,7 +201,13 @@
         {#if error}
           <div class="error-message">please fill fields</div>
         {/if}
-           <div class="g-recaptcha" id="html_element" data-sitekey="6LeeqKYZAAAAAIyB1tgUoVq2KE9dnmgNBrqSazUC-KEY" render="explicit"></div>
+        <div
+              class="g-recaptcha"
+              data-sitekey="6LeeqKYZAAAAAIyB1tgUoVq2KE9dnmgNBrqSazUC"
+              data-callback={verifyUser}
+             />
+        
+           <!-- <div class="g-recaptcha" id="html_element" data-sitekey="6LeeqKYZAAAAAIyB1tgUoVq2KE9dnmgNBrqSazUC-KEY"></div> -->
         <mwc-button on:click={addPost} label="add post" raised />
       </div>
     </div>

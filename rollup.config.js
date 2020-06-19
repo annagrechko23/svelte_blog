@@ -5,6 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import postcss from 'rollup-plugin-postcss';
 import svg from 'rollup-plugin-svg-import';
+import replace from 'rollup-plugin-replace';
 const production = !process.env.ROLLUP_WATCH;
 
 export default {
@@ -27,7 +28,9 @@ export default {
       
 			
 		}),
-		
+		replace({
+			'process.env.RECAPTCHA_KEY': '6LeeqKYZAAAAAIyB1tgUoVq2KE9dnmgNBrqSazUC'
+		}),
 		resolve({
 			browser: true,
 			dedupe: ['svelte']
