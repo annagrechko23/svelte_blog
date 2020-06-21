@@ -9,7 +9,6 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "11.0.2",
     "@rollup/plugin-node-resolve": "^7.0.0",
-    "fa-svelte": "^3.1.0",
     "node-sass": "^4.14.1",
     "rollup": "^1.20.0",
     "rollup-plugin-livereload": "^1.0.0",
@@ -18,19 +17,13 @@
     "rollup-plugin-svelte": "^5.0.3",
     "rollup-plugin-svg-import": "^1.5.1",
     "rollup-plugin-terser": "^5.1.2",
-    "svelte": "^3.0.0",
-    "svelte-material-ui": "^1.0.0-beta.21",
-    "svelte-preprocess": "^3.7.4",
-    "svelte-preprocess-sass": "^0.2.0"
+    "svelte": "^3.0.0"
   },
   "dependencies": {
-    "@fortawesome/free-solid-svg-icons": "^5.13.0",
     "@material/mwc-button": "^0.15.0",
     "@material/mwc-icon": "^0.15.0",
     "@material/mwc-icon-button": "^0.15.0",
     "@material/mwc-icon-button-toggle": "^0.15.0",
-    "@webcomponents/webcomponentsjs": "^2.4.3",
-    "coffeekraken-s-recaptcha-component": "^1.0.2",
     "firebase": "^7.14.4",
     "rxfire": "^3.12.4",
     "rxjs": "^6.5.5",

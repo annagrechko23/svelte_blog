@@ -21,47 +21,52 @@
   let posts = []
   const myUrl = new URL(window.location.href)
   const urlOrigin = myUrl.origin
-    console.log(urlOrigin)
 
-  const postsData = firestore.collection('articles')
+  const postsData = firestore
+    .collection('articles')
+    .where('url', '==', urlOrigin)
   collectionData(postsData, 'id').subscribe((data) => {
     posts = data
   })
-  const verifyUser = () => {
-    console.log('2')
-  }
 
-  onMount(() => {
-    window.verifyUser = verifyUser
-    
-  })
-
-  onDestroy(() => {
-    window.verifyUser = null
-  })
-  const addPost = () => {
+  const addPost = async () => {
     if (header && description) {
-      firestore.collection('articles').add({
-        header,
-        description,
-        created: Date.now(),
-        checked: false,
-        image: firestore.doc('/images/' + file.name),
-        likes: 0,
-        url: urlOrigin
-      })
       var storageRef = storage.ref('images/' + file.name)
       var task = storageRef.put(file)
       task.on('state_changed', function progress(snapshot) {
         var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
       })
-      header = ''
-      description = ''
-      createTemplate = false
-      error = false
+      await firestore
+        .collection('articles')
+        .add({
+          header,
+          description,
+          created: Date.now(),
+          checked: false,
+          image: firestore.doc('/images/' + file.name),
+          likes: 0,
+          url: urlOrigin,
+        })
+        .then((ref) => {
+          header = ''
+          description = ''
+          createTemplate = false
+          error = false
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+      
     } else {
       error = true
     }
+  }
+  const removePost = (event) => {
+    const { id } = event.detail;
+    firestore
+      .collection('articles')
+      .doc(id)
+      .delete()
   }
   const countLikes = (event) => {
     const { id, newStatus, likes } = event.detail
@@ -73,7 +78,6 @@
       .update({ likes: num, checked: newStatus })
   }
   const addComment = (event) => {
-
     const { id, commentName, comment, commentsBlock } = event.detail
 
     const generateNumber =
@@ -81,28 +85,19 @@
     const newComments = {
       ...commentsBlock,
       [generateNumber]: {
-        name: commentName,
-        comment,
         date: Date.now(),
+        comment,
+        name: commentName,
       },
     }
-    firestore.collection('articles').doc(id).update({
-      comments: newComments,
-    })
+    firestore.collection('articles').doc(id).update({ comments: newComments })
   }
+
   const onFileChange = (event) => {
     var fileData = event.target.files[0]
     file = fileData
-    
   }
-  var verifyCallback = function(response) {
-        parent.postMessage("Unlock", "{!$Site.BaseSecureUrl}");
-    };
-    var onloadCallback = function() {
-        
-    }
 </script>
-
 <style>
   h1,
   div {
@@ -180,11 +175,11 @@
 
 <svelte:options tag={'blog-window'} />
 
-<div class="blog-wrap" style="max-width: {width}; right: {right}; top: {top};">
+<div class="blog-wrap" style="width: {width}; max-width: {width}; right: {right}; top={top}">
   <h1 class="blog-header">Blog</h1>
   <ul class="posts">
     {#each allPosts ? posts : posts.slice(0, 3) as post}
-      <my-thing {...post} on:toggle={countLikes} on:addComment={addComment} />
+      <my-thing {...post} on:toggle={countLikes} on:addComment={addComment} on:removePost={removePost} />
     {/each}
   </ul>
   {#if createTemplate}
@@ -192,7 +187,7 @@
       <div class="create-post-wrap">
         <div
           class="close-form"
-          on:click={() => createTemplate = !createTemplate}>
+          on:click={() => (createTemplate = !createTemplate)}>
           &times;
         </div>
         <input bind:value={header} required placeholder="Title" />
@@ -201,13 +196,7 @@
         {#if error}
           <div class="error-message">please fill fields</div>
         {/if}
-        <div
-              class="g-recaptcha"
-              data-sitekey="6LeeqKYZAAAAAIyB1tgUoVq2KE9dnmgNBrqSazUC"
-              data-callback={verifyUser}
-             />
-        
-           <!-- <div class="g-recaptcha" id="html_element" data-sitekey="6LeeqKYZAAAAAIyB1tgUoVq2KE9dnmgNBrqSazUC-KEY"></div> -->
+        <!-- <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="verifyUser"></div> -->
         <mwc-button on:click={addPost} label="add post" raised />
       </div>
     </div>

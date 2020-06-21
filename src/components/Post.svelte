@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte'
+  import { onMount, tick, afterUpdate } from 'svelte'
   import '@material/mwc-icon-button-toggle'
   import '@material/mwc-button'
   import '@material/mwc-icon'
@@ -8,7 +8,6 @@
   import { get_current_component } from 'svelte/internal'
   import { storage } from '../firebase'
   import { put, getDownloadURL } from 'rxfire/storage'
-
   export let id = ''
   export let header = ''
   export let description = ''
@@ -29,16 +28,25 @@
   let error = false
   const svelteDispatch = createEventDispatcher()
   const component = get_current_component()
-  onMount(() => {
-    console.log('2')
-    if (image) {
-      const ref = storage.ref(image.path)
-      getDownloadURL(ref).subscribe((url) => (urlImage = url))
-    }
-    if (comments) {
-      commentsBlock = Object.values(comments)
-    }
-    postDescription = description
+
+  afterUpdate(() => {
+    commentsBlock = Object.values(comments)
+    const ref = storage.ref(image.path)
+    getDownloadURL(ref).subscribe((url) => (urlImage = url))
+  })
+  onMount(async () => {
+    await tick()
+
+    setTimeout(() => {
+      if (image) {
+        const ref = storage.ref(image.path)
+        getDownloadURL(ref).subscribe((url) => (urlImage = url))
+      }
+      if (comments) {
+        commentsBlock = Object.values(comments)
+      }
+      postDescription = description
+    }, 100)
   })
   const toggleStatus = () => {
     let newStatus = !checked
@@ -46,6 +54,11 @@
       component.dispatchEvent(
         new CustomEvent('toggle', { detail: { id, newStatus, likes } }),
       )
+  }
+  const removePost = () => {
+    let newStatus = !checked
+    component.dispatchEvent &&
+      component.dispatchEvent(new CustomEvent('removePost', { detail: { id } }))
   }
   const addComment = () => {
     component.dispatchEvent &&
@@ -169,11 +182,16 @@
     --mdc-theme-primary: #ff3e00;
     --mdc-theme-on-primary: white;
     margin-top: 12px;
+    font-size: 12px;
   }
   .close-form {
     text-align: right;
     margin-bottom: 10px;
     font-size: 21px;
+    cursor: pointer;
+  }
+  .delete-post {
+    text-align: right;
     cursor: pointer;
   }
 </style>
@@ -182,7 +200,11 @@
 
 <li style="margin-bottom: 20px;">
   <div class="card">
+    <!-- <div class="delete-post" on:click={removePost}>
+     &times;
+      </div> -->
     <span class="post-date">{new Date(created).toLocaleString()}</span>
+
     <h2>{header}</h2>
     <i class="fa fa-address-book" aria-hidden="true" />
     <div class="post-image">
@@ -265,7 +287,9 @@
           {/if}
 
         </div>
+
       </div>
+
       {#if showComments}
         <ul class="comments-wrap">
           {#if commentsBlock.length > 0}
