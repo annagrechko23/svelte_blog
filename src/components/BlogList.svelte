@@ -1,6 +1,7 @@
 <script>
   import { startWith } from 'rxjs/operators'
   import './Post.svelte'
+  import './Captcha.svelte'
   import { collectionData, firestore } from './../firebase'
   import firebase, { app } from '../firebase'
   import { put, getDownloadURL } from 'rxfire/storage'
@@ -10,7 +11,8 @@
   export let width = '350px'
   export let right = '50%'
   export let top = '10%'
-
+  let container
+  let count = 0
   let header = ''
   let description = ''
   let createTemplate = false
@@ -29,8 +31,12 @@
     posts = data
   })
 
-  const addPost = async () => {
-    if (header && description) {
+  const addPost = async (event) => {
+    const { valid } = event.detail
+    if (
+      (header && description && url && count < 2) ||
+      (header && description && url && valid && count > 2)
+    ) {
       var storageRef = storage.ref('images/' + file.name)
       var task = storageRef.put(file)
       task.on('state_changed', function progress(snapshot) {
@@ -56,17 +62,14 @@
         .catch((err) => {
           console.log(err)
         })
-      
     } else {
+      count += 1
       error = true
     }
   }
   const removePost = (event) => {
-    const { id } = event.detail;
-    firestore
-      .collection('articles')
-      .doc(id)
-      .delete()
+    const { id } = event.detail
+    firestore.collection('articles').doc(id).delete()
   }
   const countLikes = (event) => {
     const { id, newStatus, likes } = event.detail
@@ -92,12 +95,12 @@
     }
     firestore.collection('articles').doc(id).update({ comments: newComments })
   }
-
   const onFileChange = (event) => {
     var fileData = event.target.files[0]
     file = fileData
   }
 </script>
+
 <style>
   h1,
   div {
@@ -175,11 +178,17 @@
 
 <svelte:options tag={'blog-window'} />
 
-<div class="blog-wrap" style="width: {width}; max-width: {width}; right: {right}; top={top}">
+<div
+  class="blog-wrap"
+  style="width: {width}; max-width: {width}; right: {right}; top={top}">
   <h1 class="blog-header">Blog</h1>
   <ul class="posts">
     {#each allPosts ? posts : posts.slice(0, 3) as post}
-      <my-thing {...post} on:toggle={countLikes} on:addComment={addComment} on:removePost={removePost} />
+      <my-thing
+        {...post}
+        on:toggle={countLikes}
+        on:addComment={addComment}
+        on:removePost={removePost} />
     {/each}
   </ul>
   {#if createTemplate}
@@ -196,7 +205,9 @@
         {#if error}
           <div class="error-message">please fill fields</div>
         {/if}
-        <!-- <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="verifyUser"></div> -->
+        {#if count > 2}
+          <captcha-custom on:checkCaptcha={addPost} />
+        {/if}
         <mwc-button on:click={addPost} label="add post" raised />
       </div>
     </div>

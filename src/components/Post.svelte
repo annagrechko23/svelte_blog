@@ -1,5 +1,6 @@
 <script>
-  import { onMount, tick, afterUpdate } from 'svelte'
+  import { onMount, afterUpdate } from 'svelte'
+  import './Captcha.svelte'
   import '@material/mwc-icon-button-toggle'
   import '@material/mwc-button'
   import '@material/mwc-icon'
@@ -17,7 +18,9 @@
   export let comments = ''
   export let likes = ''
 
+  let count = 0
   let urlImage
+  let validCaptcha = false
   let postDescription
   let commentsBlock = []
   let fullText = false
@@ -35,18 +38,14 @@
     getDownloadURL(ref).subscribe((url) => (urlImage = url))
   })
   onMount(async () => {
-    await tick()
-
-    setTimeout(() => {
-      if (image) {
-        const ref = storage.ref(image.path)
-        getDownloadURL(ref).subscribe((url) => (urlImage = url))
-      }
-      if (comments) {
-        commentsBlock = Object.values(comments)
-      }
-      postDescription = description
-    }, 100)
+    if (image) {
+      const ref = storage.ref(image.path)
+      getDownloadURL(ref).subscribe((url) => (urlImage = url))
+    }
+    if (comments) {
+      commentsBlock = Object.values(comments)
+    }
+    postDescription = description
   })
   const toggleStatus = () => {
     let newStatus = !checked
@@ -55,22 +54,38 @@
         new CustomEvent('toggle', { detail: { id, newStatus, likes } }),
       )
   }
+  const addPost = async (event) => {
+    const { valid } = event.detail
+    validCaptcha = valid
+    if (valid) {
+      addComment()
+    }
+  }
   const removePost = () => {
     let newStatus = !checked
     component.dispatchEvent &&
       component.dispatchEvent(new CustomEvent('removePost', { detail: { id } }))
   }
   const addComment = () => {
-    component.dispatchEvent &&
-      component.dispatchEvent(
-        new CustomEvent('addComment', {
-          detail: { commentsBlock, id, commentName, comment },
-        }),
-      )
-    createComment = false
-    commentName = ''
-    comment = ''
-    error = false
+    if (
+      (commentName && comment && count < 2) ||
+      (commentName && comment && validCaptcha && count > 2)
+    ) {
+      component.dispatchEvent &&
+        component.dispatchEvent(
+          new CustomEvent('addComment', {
+            detail: { commentsBlock, id, commentName, comment },
+          }),
+        )
+      createComment = false
+      commentName = ''
+      comment = ''
+      error = false
+      count = 0
+    } else {
+      count += 1
+      error = true
+    }
   }
 </script>
 
@@ -190,9 +205,11 @@
     font-size: 21px;
     cursor: pointer;
   }
-  .delete-post {
-    text-align: right;
-    cursor: pointer;
+  .error-message {
+    color: red;
+    margin: 20px 0;
+    text-align: left;
+    text-transform: capitalize;
   }
 </style>
 
@@ -343,7 +360,11 @@
             {#if error}
               <div class="error-message">please fill fields</div>
             {/if}
-            <mwc-button on:click={addComment(id)} label="add comment" raised />
+            {#if count > 2}
+              <captcha-custom on:checkCaptcha={addPost} />
+            {/if}
+
+            <mwc-button on:click={addComment} label="add comment" raised />
           </div>
         {/if}
         <mwc-button
