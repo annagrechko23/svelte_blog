@@ -21,9 +21,7 @@ const app = firebase.initializeApp({
 const firestore = firebase.firestore(app);
 const storage = firebase.storage();
 
-const auth = firebase.auth(app);
-const loggedIn$ = authState(auth).pipe(map(user => (user ? user : null)));
 
-export { app, auth, firestore, storage, collectionData, loggedIn$ };
+export { app, firestore, storage, collectionData };
 
 export default firebase;

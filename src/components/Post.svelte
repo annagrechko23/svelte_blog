@@ -46,6 +46,7 @@
       commentsBlock = Object.values(comments)
     }
     postDescription = description
+    postDescription.toString()
   })
   const toggleStatus = () => {
     let newStatus = !checked
