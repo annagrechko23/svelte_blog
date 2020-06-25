@@ -117,7 +117,10 @@
     padding: 20px;
     border: 1px solid #eee;
     border-radius: 4px;
-    position: absolute;
+    bottom: 0;
+    position: fixed;
+    overflow-y: scroll;
+    overflow-x: hidden;
     margin: 0 auto;
   }
   .blog-header {
@@ -180,7 +183,7 @@
 
 <div
   class="blog-wrap"
-  style="width: {width}; max-width: {width}; right: {right}; top={top}">
+  style="width: {width}; max-width: {width}; right: {right}; top: {top}">
   <h1 class="blog-header">Blog</h1>
   <ul class="posts">
     {#each allPosts ? posts : posts.slice(0, 3) as post}
